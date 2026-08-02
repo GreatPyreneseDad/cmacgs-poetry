@@ -1,0 +1,3 @@
+# Bucket of Gravel
+
+i found myself at the bottom of a mountain/ so tall it seemed. until i reached the summit/ and i realized that i hadnt got to know the mountain at all/ it only knew me/ and for just a tiny moment my whole life must of seemed to it/ and the pebbles i found of gold and ruby / they couldnt tell the story half as well as a bucket of gravel from the stream at the base where i camped/ and in that realization i found/ that the only way to know yourself fully / is to let the river of life turn you into that bucket of gravel./ and i think thats why god built this place / so we could understand
