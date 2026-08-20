@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ego or love — a keyed poem</title>
+<meta name="description" content="One field of jumbled words. Two keys. Type ego or love and the same text delivers a different poem.">
+<meta name="theme-color" content="#0a0a0c">
+<link rel="canonical" href="https://greatpyrenesedad.github.io/cmacgs-poetry/ego-or-love.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="cmacgs poetry">
+<meta property="og:title" content="ego or love — a keyed poem">
+<meta property="og:description" content="One field of jumbled words. Two keys. Type ego or love and the same text delivers a different poem.">
+<meta property="og:url" content="https://greatpyrenesedad.github.io/cmacgs-poetry/ego-or-love.html">
+<meta property="og:image" content="https://greatpyrenesedad.github.io/cmacgs-poetry/ego-or-love-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A dark field of scattered words with the prompt: one word turns the lock. ego or love.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ego or love — a keyed poem">
+<meta name="twitter:description" content="One field of jumbled words. Two keys. Type ego or love and the same text delivers a different poem.">
+<meta name="twitter:image" content="https://greatpyrenesedad.github.io/cmacgs-poetry/ego-or-love-card.png">
+<style>
+  :root{
+    --bg:#0a0a0c;
+    --ink:#e9e3d6;
+    --ghost:#1b1a1e;
+    --ego:#9fb3c8;
+    --love:#e3b675;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink)}
+  body{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:6vh 5vw;
+    -webkit-font-smoothing:antialiased;
+  }
+  .frame{width:100%;max-width:760px;display:flex;flex-direction:column;align-items:center}
+
+  .eyebrow{
+    font-size:.66rem;letter-spacing:.42em;text-transform:uppercase;
+    color:#4a4640;margin-bottom:3.2rem;
+  }
+
+  .stage{width:100%;min-height:300px;display:flex;align-items:center;justify-content:center}
+
+  /* ---------- the field ---------- */
+  #field{
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+    gap:.15rem .55rem;line-height:2.5;
+  }
+  .w{
+    display:inline-block;
+    transition:opacity .9s ease, color .9s ease, text-shadow .9s ease, transform .95s cubic-bezier(.19,1,.22,1);
+    will-change:transform,opacity;
+    white-space:nowrap;
+  }
+  .w.dim{opacity:.045 !important;color:var(--ink)}
+  .w.lit{opacity:1 !important;}
+
+  /* ---------- the poem ---------- */
+  #poem{display:none;flex-direction:column;align-items:center;gap:.15rem}
+  #poem .line{
+    font-size:clamp(1.15rem,3.6vw,1.7rem);
+    line-height:1.75;letter-spacing:.005em;
+    display:flex;flex-wrap:wrap;justify-content:center;gap:0 .42rem;
+  }
+  #poem .w{transform:none;opacity:1}
+  #poem .w.shared{border-bottom:1px solid rgba(233,227,214,.10)}
+
+  /* ---------- controls ---------- */
+  .controls{margin-top:3.4rem;display:flex;flex-direction:column;align-items:center;gap:1rem;width:100%}
+  .ask{font-size:.95rem;color:#6e675c;letter-spacing:.02em;text-align:center;line-height:1.7}
+  input[type=text]{
+    background:transparent;border:none;border-bottom:1px solid #2e2b26;
+    color:var(--ink);font-family:inherit;font-size:1.15rem;text-align:center;
+    padding:.45rem .6rem;width:12rem;outline:none;letter-spacing:.16em;
+    transition:border-color .4s ease;
+  }
+  input[type=text]:focus{border-color:#5a5348}
+  input[type=text]::placeholder{color:#3a3630;letter-spacing:.16em}
+
+  .keymark{
+    font-size:.66rem;letter-spacing:.42em;text-transform:uppercase;
+    margin-bottom:2.4rem;opacity:0;transition:opacity 1.2s ease;
+  }
+  .keymark.show{opacity:1}
+
+  .again{
+    background:none;border:none;color:#5f594e;font-family:inherit;
+    font-size:.85rem;letter-spacing:.14em;cursor:pointer;padding:.4rem .2rem;
+    border-bottom:1px solid transparent;transition:color .4s ease,border-color .4s ease;
+    opacity:0;pointer-events:none;
+  }
+  .again.show{opacity:1;pointer-events:auto}
+  .again:hover{color:var(--ink);border-color:#3a352d}
+
+  .miss{font-size:.85rem;color:#5a5348;height:1.2rem;opacity:0;transition:opacity .5s ease;letter-spacing:.06em}
+  .miss.show{opacity:1}
+
+  .fade-out{opacity:0 !important;transition:opacity .7s ease}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="eyebrow">a keyed poem</div>
+
+  <div class="keymark" id="keymark"></div>
+
+  <div class="stage">
+    <div id="field"></div>
+    <div id="poem"></div>
+  </div>
+
+  <div class="controls">
+    <div class="ask" id="ask">one word turns the lock</div>
+    <input type="text" id="key" placeholder="ego / love" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="type one word">
+    <div class="miss" id="miss"></div>
+    <button class="again" id="again"></button>
+  </div>
+</div>
+
+<script>
+// t = token, e = line index in the EGO reading, l = line index in the LOVE reading (-1 = absent)
+const WORDS = [
+  {t:'i',       e:0,  l:0},
+  {t:'take',    e:0,  l:-1},
+  {t:'give',    e:-1, l:0},
+  {t:'what',    e:0,  l:0},
+  {t:'is',      e:0,  l:-1},
+  {t:'was',     e:-1, l:0},
+  {t:'never',   e:-1, l:0},
+  {t:'mine',    e:0,  l:0},
+  {t:'before',  e:1,  l:-1},
+  {t:'another', e:1,  l:-1},
+  {t:'does',    e:1,  l:-1},
+  {t:'the',     e:2,  l:1},
+  {t:'world',   e:2,  l:1},
+  {t:'is',      e:2,  l:1},
+  {t:'small',   e:2,  l:-1},
+  {t:'wide',    e:-1, l:1},
+  {t:'enough',  e:-1, l:1},
+  {t:'no',      e:-1, l:2},
+  {t:'someone', e:3,  l:-1},
+  {t:'one',     e:-1, l:2},
+  {t:'must',    e:3,  l:2},
+  {t:'lose',    e:3,  l:2},
+  {t:'i',       e:4,  l:3},
+  {t:'build',   e:4,  l:3},
+  {t:'walls',   e:4,  l:-1},
+  {t:'doors',   e:-1, l:3},
+  {t:'i',       e:5,  l:4},
+  {t:'count',   e:5,  l:4},
+  {t:'what',    e:5,  l:-1},
+  {t:'i',       e:5,  l:-1},
+  {t:'own',     e:5,  l:-1},
+  {t:'nothing', e:-1, l:4},
+  {t:'and',     e:6,  l:5},
+  {t:'still',   e:6,  l:5},
+  {t:'i',       e:6,  l:5},
+  {t:'am',      e:6,  l:5},
+  {t:'hungry',  e:6,  l:-1},
+  {t:'full',    e:-1, l:5},
+  {t:'the',     e:7,  l:6},
+  {t:'seed',    e:7,  l:6},
+  {t:'is',      e:7,  l:6},
+  {t:'buried',  e:7,  l:-1},
+  {t:'planted', e:-1, l:6},
+  {t:'i',       e:8,  l:7},
+  {t:'am',      e:8,  l:7},
+  {t:'alone',   e:8,  l:-1},
+  {t:'whole',   e:-1, l:7}
+];
+
+const field   = document.getElementById('field');
+const poem    = document.getElementById('poem');
+const keyIn   = document.getElementById('key');
+const ask     = document.getElementById('ask');
+const miss    = document.getElementById('miss');
+const again   = document.getElementById('again');
+const keymark = document.getElementById('keymark');
+
+const turned = new Set();
+let busy = false;
+let spans = [];
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function buildField(){
+  field.style.display='flex';
+  field.innerHTML='';
+  poem.style.display='none';
+  poem.innerHTML='';
+  spans = WORDS.map((w,i)=>{
+    const s=document.createElement('span');
+    s.className='w';
+    s.textContent=w.t;
+    s.dataset.i=i;
+    const rx=(Math.random()*14-7).toFixed(1);
+    const ry=(Math.random()*20-10).toFixed(1);
+    const rr=(Math.random()*10-5).toFixed(1);
+    s.style.transform=`translate(${rx}px, ${ry}px) rotate(${rr}deg)`;
+    s.style.opacity=(0.42+Math.random()*0.4).toFixed(2);
+    s.style.fontSize=(0.92+Math.random()*0.34).toFixed(2)+'rem';
+    return s;
+  });
+  const display = shuffle(spans.slice()); // scatter on screen; spans[] keeps reading order
+  display.forEach(s=>field.appendChild(s));
+}
+
+function reveal(mode){
+  busy = true;
+  const accent = mode==='ego' ? getComputedStyle(document.documentElement).getPropertyValue('--ego')
+                              : getComputedStyle(document.documentElement).getPropertyValue('--love');
+  const pick = w => mode==='ego' ? w.e : w.l;
+
+  // 1. the field sorts itself: what the key does not touch goes out
+  spans.forEach((s,i)=>{
+    if(pick(WORDS[i])>=0){ s.classList.add('lit'); s.style.color=accent.trim(); }
+    else { s.classList.add('dim'); }
+  });
+
+  keymark.textContent = mode;
+  keymark.style.color = accent.trim();
+  keymark.classList.add('show');
+
+  // 2. re-weave
+  setTimeout(()=>{
+    const chosen = spans.filter((s,i)=>pick(WORDS[i])>=0);
+    const first = new Map();
+    chosen.forEach(s=>first.set(s, s.getBoundingClientRect()));
+
+    spans.forEach((s,i)=>{ if(pick(WORDS[i])<0) s.style.display='none'; });
+
+    const lines = {};
+    chosen.forEach(s=>{
+      const w = WORDS[+s.dataset.i];
+      const li = pick(w);
+      if(!lines[li]){
+        const d=document.createElement('div');
+        d.className='line';
+        lines[li]=d;
+        poem.appendChild(d);
+      }
+      s.style.transform='none';
+      s.style.opacity='1';
+      s.style.fontSize='';
+      if(w.e>=0 && w.l>=0) s.classList.add('shared');
+      lines[li].appendChild(s);
+    });
+
+    field.style.display='none';
+    poem.style.display='flex';
+
+    // FLIP
+    chosen.forEach(s=>{
+      const a=first.get(s), b=s.getBoundingClientRect();
+      const dx=a.left-b.left, dy=a.top-b.top;
+      s.style.transition='none';
+      s.style.transform=`translate(${dx}px, ${dy}px)`;
+    });
+    void poem.offsetWidth;
+    chosen.forEach((s,n)=>{
+      s.style.transition=`transform 1.15s cubic-bezier(.19,1,.22,1) ${(n*14)}ms, color .8s ease`;
+      s.style.transform='translate(0,0)';
+      s.style.color='';
+    });
+
+    turned.add(mode);
+    ask.classList.add('fade-out');
+    keyIn.classList.add('fade-out');
+    miss.classList.remove('show');
+
+    setTimeout(()=>{
+      keyIn.style.display='none';
+      ask.style.display='none';
+      again.textContent = turned.size===2 ? 'what neither key changed' : 'turn the other key';
+      again.classList.add('show');
+      busy=false;
+    },1500);
+  }, 1100);
+}
+
+function sharedOnly(){
+  busy=true;
+  poem.classList.add('fade-out');
+  keymark.classList.remove('show');
+  again.classList.remove('show');
+  setTimeout(()=>{
+    poem.innerHTML='';
+    poem.classList.remove('fade-out');
+    poem.style.opacity='0';
+    const shared = WORDS.filter(w=>w.e>=0 && w.l>=0);
+    const lines={};
+    shared.forEach(w=>{
+      if(!lines[w.e]){
+        const d=document.createElement('div'); d.className='line';
+        lines[w.e]=d; poem.appendChild(d);
+      }
+      const s=document.createElement('span');
+      s.className='w'; s.textContent=w.t;
+      lines[w.e].appendChild(s);
+    });
+    keymark.textContent='what neither key changed';
+    keymark.style.color='#5f594e';
+    keymark.classList.add('show');
+    poem.style.transition='opacity 1.6s ease';
+    void poem.offsetWidth;
+    poem.style.opacity='1';
+    setTimeout(()=>{ busy=false; },1600);
+  },700);
+}
+
+function reset(){
+  busy=true;
+  poem.classList.add('fade-out');
+  keymark.classList.remove('show');
+  again.classList.remove('show');
+  setTimeout(()=>{
+    poem.classList.remove('fade-out');
+    buildField();
+    keyIn.style.display='';
+    ask.style.display='';
+    keyIn.value='';
+    keyIn.classList.remove('fade-out');
+    ask.classList.remove('fade-out');
+    ask.textContent = turned.size===1
+      ? 'the field holds the other reading too'
+      : 'one word turns the lock';
+    keyIn.focus();
+    busy=false;
+  },700);
+}
+
+again.addEventListener('click',()=>{
+  if(busy) return;
+  if(turned.size===2) sharedOnly(); else reset();
+});
+
+keyIn.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'||busy) return;
+  const v = keyIn.value.trim().toLowerCase().replace(/[^a-z]/g,'');
+  if(v==='ego'||v==='love'){
+    if(turned.has(v)){
+      miss.textContent='that key is already turned';
+      miss.classList.add('show');
+      return;
+    }
+    miss.classList.remove('show');
+    reveal(v);
+  } else if(v.length){
+    miss.textContent='that word is not a key';
+    miss.classList.add('show');
+  }
+});
+
+buildField();
+keyIn.focus();
+</script>
+</body>
+</html>
